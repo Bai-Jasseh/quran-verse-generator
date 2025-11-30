@@ -1,135 +1,48 @@
-//  When the player clicks rock
-        let rock = document.querySelector(".rock-btn")
-        rock.addEventListener("click", function() {
-            let randomNumber = Math.random()
-            let computerChoose = randomNumber
-            let computerChoice = "";
+function generateRandomVerse() {
+      const info = document.getElementById('info');
+      const arabicElem = document.getElementById('arabic');
+      const englishElem = document.getElementById('english');
+      const surahElem = document.getElementById('surah');
+      const audioElem = document.getElementById('audio');
 
-            if (computerChoose >= 0 && computerChoose <= 1/3 ) {
-                computerChoice = "rock";
-            }
-            else if (computerChoose >= 1/3 && computerChoose <= 2/3) {
-                computerChoice = "paper";
-            }
-            else if (computerChoose >= 2/3 && computerChoose <= 1) {
-                computerChoice = "scissors";
-            }
+      info.textContent = "Loading...";
+      arabicElem.textContent = "";
+      englishElem.textContent = "";
+      surahElem.textContent = "";
+      audioElem.src = "";
+      audioElem.load();
 
+      const randomAyahNumber = Math.floor(Math.random() * 6236) + 1;
 
-            let playerChoice = "rock";
-            let result = "";
+      fetch('https://api.alquran.cloud/v1/ayah/' + randomAyahNumber + '/ar.alafasy')
+        .then(response => response.json())
+        .then(arabicData => {
+          if (arabicData.code !== 200) {
+            info.textContent = "Error loading Arabic text.";
+            return;
+          }
 
-            if (playerChoice === computerChoice) {
-                result = "It is a draw"
-            }
-            else if (
-                (playerChoice === "rock" && computerChoice === "scissors")||
-                (playerChoice === "paper" && computerChoice === "rock")||
-                (playerChoice === "scissors" && computerChoice === "paper")
-            ){
-                    result = "You won"
-                }
+          arabicElem.textContent = arabicData.data.text;
+          audioElem.src = arabicData.data.audio;
+          audioElem.load();
 
-                else {
-                    result = "You lost"
-                }
+          const surahName = arabicData.data.surah.englishName;
+          const ayahInSurah = arabicData.data.numberInSurah;
+          surahElem.textContent = "Surah: " + surahName + " | Ayah " + ayahInSurah;
 
-                let para = document.querySelector(".paragraph");
-                para.textContent = `The computer chose ${computerChoice}. ${result}!`;
+          return fetch('https://api.alquran.cloud/v1/ayah/' + randomAyahNumber + '/en.asad');
+        })
+        .then(englishResponse => englishResponse.json())
+        .then(englishData => {
+          if (englishData.code !== 200) {
+            englishElem.textContent = "Error loading English translation.";
+            return;
+          }
 
-
-})
-
-
-        //  When the player clicks paper
-                let paper = document.querySelector(".paper-btn");
-                paper.addEventListener("click", function() {
-                    
-                    let randomNumber = Math.random();
-                    let computerChoose = randomNumber;
-                    let computerChoice = "";
-
-                    if (computerChoose >= 0 && computerChoose <= 1/3){
-                        computerChoice = "rock";
-                    }
-                    else if (computerChoose >= 1/3 && computerChoose <= 2/3){
-                        computerChoice = "paper";
-                    }
-                    else if (computerChoose >= 2/3 && computerChoose <= 1) {
-                        computerChoice = "scissors"
-                    }
-
-
-
-                    let playerChoice = "paper";
-                    let result = "";
-            
-                    
-                    
-                    if (playerChoice === computerChoice) {
-                result = "It is a draw"
-            }
-            else if (
-                (playerChoice === "rock" && computerChoice === "scissors")||
-                (playerChoice === "paper" && computerChoice === "rock")||
-                (playerChoice === "scissors" && computerChoice === "paper")
-            ){
-                 result = "You won!"
-                }
-
-                else {
-                    result = "You lost"
-                }
-
-                    let para = document.querySelector(".paragraph");
-                    para.textContent = `The computer chose ${computerChoice}. ${result}!`;
- 
-                })
-
-
-
-                //  When the player clicks scissors
-                let scissors = document.querySelector(".scissors-btn");
-                scissors.addEventListener("click", function() {
-                    
-                    let randomNumber = Math.random();
-                    let computerChoose = randomNumber;
-                    let computerChoice = "";
-
-                    if (computerChoose >= 0 && computerChoose <= 1/3){
-                        computerChoice = "rock";
-                    }
-                    else if (computerChoose >= 1/3 && computerChoose <= 2/3){
-                        computerChoice = "paper";
-                    }
-                    else if (computerChoose >= 2/3 && computerChoose <= 1) {
-                        computerChoice = "scissors"
-                    }
-
-
-
-                    let playerChoice = "scissors";
-                    let result = "";
-            
-                    
-                    
-                    if (playerChoice === computerChoice) {
-                result = "It is a draw"
-            }
-            else if (
-                (playerChoice === "rock" && computerChoice === "scissors")||
-                (playerChoice === "paper" && computerChoice === "rock")||
-                (playerChoice === "scissors" && computerChoice === "paper")
-            ){
-                 result = "You won"
-                }
-
-                else {
-                    result = "You lost"
-                }
-
-                    let para = document.querySelector(".paragraph");
-                    para.textContent = `The computer chose ${computerChoice}. ${result}!`;
- 
-                })
-
+          englishElem.textContent = englishData.data.text;
+          info.textContent = "Here is a random verse from the Quran.";
+        })
+        .catch(error => {
+          info.textContent = "Failed to fetch verse: " + error;
+        });
+    }
